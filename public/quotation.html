@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation Report (Print Ready)</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* BASE STYLES & FONT */
+        body {
+            margin: 0;
+            padding: 25px;
+            /* Match background color from the image surrounding the form */
+            background: #f5f6f7; 
+            font-family: "Inter", sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* MAIN CONTAINER (Print Area) */
+        #print-area {
+            width: 100%;
+            max-width: 1250px; /* Adjusted width to match InvoiceReport.jsx */
+            margin: 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: #ffffff;
+            border-radius: 8px;
+        }
+
+        /* HEADING */
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #326e55; 
+            margin-bottom: 20px;
+            padding: 20px 22px 0 22px; 
+            background: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* SECTION CARD STYLES */
+        .section {
+            background: #ffffff;
+            border-radius: 8px; 
+            padding: 22px;
+            margin: 0 22px 20px 22px;
+            border: 1px solid #e0e0e0; 
+        }
+        
+        /* DATA WRAPPER */
+        #data-display {
+            padding: 0 0 25px 0;
+        }
+
+        /* DOWNLOAD BUTTON (Print Trigger) */
+        .download-button { 
+            background-color: #326e55; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 0 22px 20px 22px; 
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .download-button:hover { 
+            background-color: #2b5c49; 
+        }
+
+        /* SECTION HEADER */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d4b4b; 
+            margin-bottom: 15px; 
+            border-bottom: none; 
+            padding-bottom: 0;
+        }
+
+        /* ICON STYLES (for SVGs) */
+        .section-header svg {
+            width: 22px; 
+            height: 22px;
+            color: #326e55; 
+        }
+
+        /* DATA DISPLAY STYLES */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px 20px; 
+        }
+
+        .data-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px; 
+        }
+        
+        .data-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .data-item label {
+            font-size: 12px; 
+            font-weight: 500;
+            color: #555; 
+            text-transform: uppercase;
+        }
+
+        .data-item p {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 500; 
+            color: #222;
+            word-break: break-word;
+            background-color: #f8f8f8;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        /* FREIGHT SECTION STYLES */
+        .freight-row {
+            display: flex;
+            justify-content: space-between;
+            background: #f3f7f6; 
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .freight-col {
+            flex-grow: 1;
+            padding: 0 10px;
+        }
+
+        .freight-col h3 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
+            text-transform: uppercase;
+        }
+
+        .freight-col p {
+            margin: 4px 0 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #326e55; 
+        }
+        
+        /* FREIGHT COST DISPLAY */
+        .freight-cost-display {
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #e2ebe7; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600;
+            color: #2f664b;
+            text-align: right;
+        }
+
+        /* SUMMARY CARD STYLES */
+        .summary-card {
+            background: #e2ebe7; 
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 22px 0 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        /* SUMMARY STYLES (inside .summary-card) */
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 4px 0;
+            color: #444;
+            font-size: 15px;
+        }
+        
+        .summary-row.sub-total-line {
+            font-weight: 600;
+            color: #222;
+            border-top: 1px dashed #c0c0c0;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        /* GRAND TOTAL */
+        .grand-total {
+            margin-top: 15px;
+            padding: 15px;
+            background: #d5e2db; 
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2f664b; 
+        }
+
+        /* RESPONSIVENESS */
+        @media (max-width: 768px) {
+            #print-area { max-width: 100%; box-shadow: none; }
+            .section, .summary-card, h1, .download-button {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 🎨 PRINT STYLES - CRUCIAL FOR ONLY PRINTING THE VIEWPORT */
+        @media print {
+            /* Hide everything that is NOT the print-area */
+            body * {
+                visibility: hidden;
+                overflow: hidden; /* Prevent extra scrollbars */
+            }
+            
+            /* Make the print-area and its children visible */
+            #print-area, #print-area *, h1 {
+                visibility: visible;
+            }
+    
+            /* Position the print-area to start at the top-left of the print page */
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important; 
+                /* Ensure colors print correctly */
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
+            
+            /* Hide the download button */
+            .download-button { 
+                display: none !important; 
+            }
+    
+            /* Reset the body background for a clean print */
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+    
+            /* Ensure all sections and data-wrapper have white background and proper colors */
+            .section, .summary-card {
+                background: #ffffff !important;
+                color: #000 !important;
+                margin: 0 0 20px 0 !important;
+            }
+            
+            h1 {
+                padding-top: 0 !important;
+            }
+            
+            .data-item p {
+                background-color: #f8f8f8 !important;
+                border-color: #e0e0e0 !important;
+            }
+    
+            /* Ensure section elements don't break across pages */
+            .section, .summary-card {
+                page-break-inside: avoid;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+    
+            .grand-total {
+                background: #d5e2db !important;
+                color: #2f664b !important;
+            }
+    
+            /* Reapply background/colors for specific styled elements to ensure they print */
+            .freight-row { background: #f3f7f6 !important; }
+            .freight-cost-display { background: #e2ebe7 !important; }
+            
+            /* Ensure print area content starts at the top */
+            h1, #data-display {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="print-area">
+    <h1 class='report-title'>Quotation Report - Draft</h1> 
+    
+    <button class="download-button" onclick="printDocument()">
+        Print Report
+    </button>
+
+    <div id="data-display">
+        <p style='color: #444; text-align:center; padding: 50px;'>Loading quotation data...</p>
+    </div>
+</div>
+
+<script>
+    // --- ICON SVGS (MIMICKING REACT COMPONENT) ---
+    const DiamondIconSVG = `
+        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path d="M256 0L1 256 256 511 511 256 256 0zM256 64l179.9 179.9-179.9 179.9-179.9-179.9L256 64zM113.3 256L256 398.7 398.7 256 256 113.3 113.3 256z"/>
+        </svg>
+    `;
+    
+    const BriefcaseIconSVG = `
+        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path d="M176 96H336c26.5 0 48 21.5 48 48V256H128V144c0-26.5 21.5-48 48-48zm336 96v48c0 26.5-21.5 48-48 48H448v128c0 53-43 96-96 96H160c-53 0-96-43-96-96V288H16c-26.5 0-48-21.5-48-48V192c0-26.5 21.5-48 48-48H128V144c0-53 43-96 96-96H288c53 0 96 43 96 48h80c26.5 0 48 21.5 48 48zm-112 48H128V240h272v48zM160 384h192v64H160V384z"/>
+        </svg>
+    `;
+
+    const TruckIconSVG = `
+        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+            <path d="M144 0H512c17.7 0 32 14.3 32 32V256H384c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h96v32c0 22.1 17.9 40 40 40h40c22.1 0 40-17.9 40-40s-17.9-40-40-40H528V288h16c8.8 0 16-7.2 16-16V64c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16V288c0 8.8 7.2 16 16 16h16V256c0-17.7 14.3-32 32-32h96V32c0-17.7-14.3-32-32-32zm48 480a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM152 480a48 48 0 1 0-96 0 48 48 0 1 0 96 0zM520 288c-13.3 0-24 10.7-24 24s10.7 24 24 24h32c13.3 0 24-10.7 24-24s-10.7-24-24-24H520zm-80 0c-13.3 0-24 10.7-24 24s10.7 24 24 24h32c13.3 0 24-10.7 24-24s-10.7-24-24-24H440zM32 320c-17.7 0-32 14.3-32 32V480c0 17.7 14.3 32 32 32H352c17.7 0 32-14.3 32-32V352c0-17.7-14.3-32-32-32H32z"/>
+        </svg>
+    `;
+
+    const ReceiptIconSVG = `
+        <svg class="summary-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <path d="M64 0c-17.7 0-32 14.3-32 32V480c0 17.7 14.3 32 32 32H320c17.7 0 32-14.3 32-32V160H224c-17.7 0-32-14.3-32-32V0H64zm184 0v96c0 8.8 7.2 16 16 16h96L248 0zm-8 416H152c-13.3 0-24-10.7-24-24s10.7-24 24-24h88c13.3 0 24 10.7 24 24s-10.7 24-24 24zm-24-96H176c-13.3 0-24-10.7-24-24s10.7-24 24-24h56c13.3 0 24 10.7 24 24s-10.7 24-24 24zm-16-96H192c-13.3 0-24-10.7-24-24s10.7-24 24-24h24c13.3 0 24 10.7 24 24s-10.7 24-24 24z"/>
+        </svg>
+    `;
+    
+    // Icon for Customer Details (User Icon)
+    const UserIconSVG = `
+        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path fill="currentColor" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3c0 16.2 13.1 29.7 29.7 29.7H418.3c16.2 0 29.7-13.1 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/>
+        </svg>
+    `;
+
+    // --- MAPPING (Using camelCase keys as the standard) ---
+    const ICON_MAPPING = {
+        'Quotation & Stone Details': DiamondIconSVG, 
+        'Company Details': BriefcaseIconSVG, 
+        'Customer Details': UserIconSVG, 
+        'Freight Details': TruckIconSVG, 
+        'Quotation Summary': ReceiptIconSVG
+    };
+
+    // Corrected labels using camelCase keys
+    const COLUMN_LABELS = {
+        'invoiceNo': 'Invoice Number',
+        'date': 'Quotation Date',
+        'typeOfStone': 'Type of Stone',
+        'statusOfStone': 'Finishing Type', 
+        'size': 'Size',
+        'quantity': 'Quantity (sq ft)',
+        'thickness': 'Thickness',
+        'ratePer': 'Rate Per (₹/sq.ft.)',
+        'rateValue': 'Rate Value (₹)',
+        'gstPercent': 'GST (%)',
+        
+        'ownerName': 'Owner Full Name',
+        'companyName': 'Company Name',
+        'mobileNo': 'Mobile Number',
+        'emailAddress': 'Email Address',
+        'address': 'Address (City, District, State)',
+        
+        'customerName': 'Customer Name',
+        'customerMobileNo': 'Customer Mobile No.',
+        'permanentAddress': 'Permanent Address',
+        'postalCode': 'Postal Code',
+        'customerGst': 'Customer GST',
+
+        'estimatedWeight': 'Weight (KG)',
+        'quintals': 'Quintals',
+        'tonnes': 'Tonnes',
+        'selectedState': 'Transportation State', 
+        'selectedDistrict': 'Transportation District', 
+        'selectedCity': 'Transportation City', 
+        'freightRate': 'Freight Rate (₹ / Quintal)',
+        'freightCost': 'Freight Cost', 
+
+        'subTotal': 'Stone Rate Value', 
+        'gstAmount': 'GST Amount',
+        'totalWithoutFreight': 'Total (Stone + GST)', 
+        'freightCharges': 'Total Freight Charges', 
+        'grandTotal': 'Grand Total'
+    };
+    
+    // Corrected structure using camelCase keys
+    const QUOTATION_STRUCTURE = [
+        {
+            title: "Quotation & Stone Details", 
+            keys: ['invoiceNo', 'date', 'typeOfStone', 'statusOfStone', 'size', 'quantity', 'thickness', 'ratePer', 'rateValue', 'gstPercent']
+        },
+        {
+            title: "Company Details", 
+            keys: ['ownerName', 'companyName', 'mobileNo', 'emailAddress', 'address']
+        },
+        {
+            title: "Customer Details",
+            keys: ['customerName', 'customerMobileNo', 'permanentAddress', 'postalCode', 'customerGst']
+        },
+        {
+            title: "Freight Details", 
+            keys: ['selectedState', 'selectedDistrict', 'selectedCity', 'freightRate'] 
+        }
+    ];
+    
+    /**
+     * Helper function to convert a camelCase string to snake_case.
+     * @param {string} key - The camelCase key.
+     * @returns {string} The snake_case key.
+     */
+    function toSnakeCase(key) {
+        return key.replace(/([A-Z])/g, (match) => `_${match.toLowerCase()}`);
+    }
+
+    /**
+     * Robustly retrieves data, checking for both camelCase and snake_case keys.
+     * Prefers camelCase, falls back to snake_case.
+     * @param {Object} data - The quotation data object.
+     * @param {string} camelCaseKey - The standard camelCase key to look for.
+     * @returns {string | number | null} The value associated with the key, or an empty string if not found.
+     */
+    function normalizeDataKeys(data, camelCaseKey) {
+        // 1. Try camelCase (standard from Estimation.jsx)
+        if (data.hasOwnProperty(camelCaseKey)) {
+            return data[camelCaseKey];
+        }
+
+        // 2. Try snake_case (backup format)
+        const snakeCaseKey = toSnakeCase(camelCaseKey);
+        if (data.hasOwnProperty(snakeCaseKey)) {
+            return data[snakeCaseKey];
+        }
+
+        // 3. Fallback for ID keys which might be 'id' or 'invoice_no'
+        if (camelCaseKey === 'invoiceNo' && data.hasOwnProperty('invoice_no')) {
+            return data['invoice_no'];
+        }
+        
+        if (camelCaseKey === 'date' && data.hasOwnProperty('date')) {
+            return data['date']; // If date is present in either format
+        }
+
+        return '';
+    }
+
+    function formatValue(key, data) {
+        const value = normalizeDataKeys(data, key);
+
+        if (value === null || value === undefined || value === "") return "N/A";
+        
+        const num = parseFloat(value);
+        // Using the camelCase keys here for formatting logic
+        const rupeeKeys = ['subTotal','gstAmount','totalWithoutFreight','freightCharges','grandTotal','rateValue','freightRate', 'freightCost', 'ratePer']; 
+
+        if (rupeeKeys.includes(key)) {
+            if (isNaN(num)) return String(value);
+            return `₹ ${num.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+        
+        if (key === 'estimatedWeight' && !isNaN(num)) return `${num.toLocaleString('en-IN', { maximumFractionDigits: 2 })} kg`;
+        if (key === 'quintals' && !isNaN(num)) return `${num.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+        if (key === 'tonnes' && !isNaN(num)) return `${num.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+
+        if (key === 'gstPercent' && !isNaN(num)) return `${num}%`;
+        
+        if (key === 'quantity' && !isNaN(num)) return `${num.toLocaleString('en-IN', { maximumFractionDigits: 2 })} sq ft`;
+
+        if (key === 'date' && String(value).includes("-")) { 
+             try {
+                // Handle various date formats by ensuring the input is a valid date object
+                let dateObj = new Date(value);
+                // Check if the date object is valid
+                if (!isNaN(dateObj)) {
+                    return dateObj.toLocaleDateString("en-IN", { timeZone: 'Asia/Kolkata' });
+                }
+            } catch(e) {
+                // Fallback to original string if date formatting fails
+            }
+        }
+        
+        return String(value);
+    }
+    
+    function renderDataGrid(data, keys) {
+        let itemsHtml = keys.map(key => {
+            const label = COLUMN_LABELS[key] || key;
+            const value = formatValue(key, data); // Use the data object for formatValue
+            const itemClass = (key === 'address' || key === 'permanentAddress') ? 'data-item full-width' : 'data-item'; 
+            
+            return `
+                <div class="${itemClass}">
+                    <label>${label}</label>
+                    <p>${value}</p>
+                </div>
+            `;
+        }).join('');
+
+        return `<div class="data-grid">${itemsHtml}</div>`;
+    }
+
+    function renderFreightInfo(data) {
+        // Using camelCase keys
+        const weightKeys = ['estimatedWeight', 'quintals', 'tonnes'];
+        const destinationAndRateKeys = ['selectedState', 'selectedDistrict', 'selectedCity', 'freightRate'];
+
+        let weightHtml = weightKeys.map(key => `
+            <div class="freight-col">
+                <h3>${COLUMN_LABELS[key]}</h3>
+                <p>${formatValue(key, data)}</p>
+            </div>
+        `).join('');
+
+        const dataGridHtml = renderDataGrid(data, destinationAndRateKeys);
+        
+        // Use normalizeDataKeys for freightCost
+        const freightCostValue = formatValue('freightCost', data);
+
+        return `
+            <div class="freight-row">${weightHtml}</div>
+            ${dataGridHtml}
+            <div class="freight-cost-display">
+                <strong>${COLUMN_LABELS['freightCost']}</strong>: ${freightCostValue}
+            </div>
+        `;
+    }
+
+    function renderSummary(data) {
+        // Use normalizeDataKeys helper for all values
+        const subtotal = formatValue('subTotal', data);
+        const gstAmount = formatValue('gstAmount', data);
+        const totalExclFreight = formatValue('totalWithoutFreight', data);
+        const freightCharges = formatValue('freightCharges', data);
+        const grandTotal = formatValue('grandTotal', data);
+        const gstPercent = formatValue('gstPercent', data);
+        const summaryIcon = ICON_MAPPING['Quotation Summary'];
+        
+        return `
+            <div class="summary-card">
+                <div class="section-header">
+                    ${summaryIcon}
+                    Quotation Summary
+                </div>
+                <div class="summary">
+                    <div class="summary-row">
+                        <span>${COLUMN_LABELS['subTotal']}</span> <span>${subtotal}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>GST (${gstPercent})</span> <span>${gstAmount}</span>
+                    </div>
+
+                    <div class="summary-row sub-total-line">
+                        <span>${COLUMN_LABELS['totalWithoutFreight']}</span> <span>${totalExclFreight}</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>${COLUMN_LABELS['freightCharges']}</span> <span>${freightCharges}</span>
+                    </div>
+                </div>
+
+                <div class="grand-total">
+                    <span>${COLUMN_LABELS['grandTotal']}</span>
+                    <span>${grandTotal}</span>
+                </div>
+            </div>
+        `;
+    }
+
+
+    // Function to retrieve and decode the JSON data from URL (Base64 is required here)
+    function getQuotationData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
+        if (!encodedData) return null;
+
+        try {
+            // Data is passed as Base64 encoded JSON (as implemented in Estimation.jsx)
+            const jsonData = atob(encodedData); 
+            // The JSON object can contain camelCase or snake_case keys.
+            return JSON.parse(jsonData);
+        } catch (e) {
+            console.error("Failed to decode or parse quotation data:", e);
+            return null;
+        }
+    }
+
+    function displayQuotationData() {
+        const data = getQuotationData();
+        const div = document.getElementById("data-display");
+        
+        if (!data) {
+            div.innerHTML = "<p style='color:red; text-align:center; padding: 50px;'>No quotation data found in the URL. Please ensure the 'data' parameter is correctly passed.</p>";
+            document.querySelector('h1').textContent = "Quotation Report - Error";
+            return;
+        }
+
+        // Get the invoice number, checking both 'invoiceNo' and 'invoice_no'
+        const invoiceNo = normalizeDataKeys(data, 'invoiceNo') || 'Draft';
+        document.querySelector('h1').textContent = `Quotation Report - ${invoiceNo}`; 
+
+
+        let html = '';
+
+        QUOTATION_STRUCTURE.forEach(section => {
+            let sectionContent;
+            
+            if (section.title.includes("Freight")) {
+                sectionContent = renderFreightInfo(data);
+            } else {
+                sectionContent = renderDataGrid(data, section.keys);
+            }
+            
+            // Use ICON_MAPPING directly for SVG markup
+            html += `
+                <div class="section">
+                    <div class="section-header">
+                        ${ICON_MAPPING[section.title]}
+                        ${section.title}
+                    </div>
+                    ${sectionContent}
+                </div>
+            `;
+        });
+
+        html += renderSummary(data);
+
+        div.innerHTML = html;
+    }
+
+    // Function to trigger native browser print (Ctrl+P/Cmd+P)
+    function printDocument() {
+        window.print();
+    }
+
+    window.onload = displayQuotationData;
+</script>
+
+</body>
+</html>
